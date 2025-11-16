@@ -6,7 +6,8 @@ enum Tok<'a> {
     },
     Text {
         cont: &'a str,
-    }
+    },
+    Empty,
 }
 
 struct Lexer {
@@ -39,7 +40,6 @@ impl Lexer {
 
                 let id = self.lex_id(src);
 
-                // <h1/>
                 if self.eat('/') {
                     self.expect('>');
 
@@ -52,6 +52,7 @@ impl Lexer {
                 self.expect('>');
 
                 let mut children = Vec::new();
+                self.next_while(|c| matches!(c, ' ' | '\n'));
                 while self.curr() != '<' || self.peek() != '/' {
                     children.push(self.to_tok(src));
                 }
@@ -59,12 +60,15 @@ impl Lexer {
                 if self.peek() == '/' {
                     self.expect('<');
                     self.next();
+
                     let id_close = self.lex_id(src);
                     if id != id_close {
                         panic!("no corresponding closing tag");
                     }
                     self.expect('>');
                 }
+
+                self.next_while(|c| matches!(c, ' ' | '\n'));
 
                 Tok::Tag {
                     name: id,
@@ -78,12 +82,12 @@ impl Lexer {
     }
 
     fn lex_id<'a>(&mut self, src: &'a str) -> &'a str {
-        let start = self.next_until(|c| c.is_alphanumeric());
+        let start = self.next_while(|c| c.is_alphanumeric());
         &src[start..self.pos]
     }
 
     fn lex_text<'a>(&mut self, src: &'a str) -> &'a str {
-        let start = self.next_until(|c| c != '<');
+        let start = self.next_while(|c| c != '<');
         &src[start..self.pos]
     }
 
@@ -120,10 +124,10 @@ impl Lexer {
         }
     }
 
-    fn next_until(&mut self, is_char: impl Fn(char) -> bool) -> usize {
+    fn next_while(&mut self, is: impl Fn(char) -> bool) -> usize {
         let start = self.pos;
 
-        while !self.is_eof() && is_char(self.curr()) {
+        while !self.is_eof() && is(self.curr()) {
             self.next();
         }
 
@@ -132,8 +136,9 @@ impl Lexer {
 }
 
 fn main() {
-    // let input = "<h1>Hello world!</h1>";
-    let input = "<div><h1>Foo</h1></div>";
+    let input = "<div>
+        <h1>Foo</h1>
+    </div>";
     let mut lexer = Lexer::new(input);
     lexer.lex(&input);
 }
