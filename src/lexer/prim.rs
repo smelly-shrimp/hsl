@@ -11,17 +11,24 @@ impl Lexer {
         let is_comp = self.eat('@');
         let id = self.lex_id(src);
 
+        let attrs = self.lex_attrs(src);
+        // let attrs = if self.curr() != '>' || self.curr() != '/' {
+        //     self.lex_attrs(src)
+        // } else { Vec::new() };
+
         let mk_tag = |name, children| -> Tok {
             if is_comp {
                 return Tok::CompTag {
                     name,
-                    children
+                    attrs,
+                    children,
                 };
             }
 
             Tok::Tag {
                 name,
-                children
+                attrs,
+                children,
             }
         };
 
@@ -68,5 +75,30 @@ impl Lexer {
     fn lex_text<'a>(&mut self, src: &'a str) -> &'a str {
         let start = self.next_while(|c| c != '<');
         &src[start..self.pos]
+    }
+
+    fn lex_val<'a>(&mut self, src: &'a str) -> &'a str {
+        self.expect('"');
+        let start = self.next_while(|c| c != '"');
+        self.expect('"');
+
+        &src[start..self.pos - 1]
+    }
+
+    fn lex_attrs<'a>(&mut self, src: &'a str) -> Vec<(&'a str, &'a str)> {
+        let mut attrs = Vec::new();
+
+        while self.curr() != '>' && self.curr() != '/' {
+            self.expect(' ');
+
+            let key = self.lex_id(src);
+            let val = if self.eat('=') {
+                self.lex_val(src)
+            } else { "" };
+
+            attrs.push((key, val));
+        }
+
+        attrs
     }
 }
