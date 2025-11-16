@@ -12,9 +12,6 @@ impl Lexer {
         let id = self.lex_id(src);
 
         let attrs = self.lex_attrs(src);
-        // let attrs = if self.curr() != '>' || self.curr() != '/' {
-        //     self.lex_attrs(src)
-        // } else { Vec::new() };
 
         let mk_tag = |name, children| -> Tok {
             if is_comp {
@@ -41,10 +38,10 @@ impl Lexer {
         self.expect('>');
 
         let mut children = Vec::new();
-        self.next_while(|c| matches!(c, ' ' | '\n'));
+        self.eat_space();
         while self.curr() != '<' || self.peek() != '/' {
             children.push(self.to_tok(src));
-            self.next_while(|c| matches!(c, ' ' | '\n'));
+            self.eat_space();
         }
 
         if self.peek() == '/' {
@@ -62,7 +59,7 @@ impl Lexer {
             self.expect('>');
         }
 
-        self.next_while(|c| matches!(c, ' ' | '\n'));
+        self.eat_space();
 
         mk_tag(id, children)
     }
@@ -89,7 +86,7 @@ impl Lexer {
         let mut attrs = Vec::new();
 
         while self.curr() != '>' && self.curr() != '/' {
-            self.expect(' ');
+            self.expect_space();
 
             let key = self.lex_id(src);
             let val = if self.eat('=') {
@@ -100,5 +97,16 @@ impl Lexer {
         }
 
         attrs
+    }
+
+    fn eat_space(&mut self) {
+        self.next_while(|c| c == ' ' || c == '\t' || c == '\n');
+    }
+
+    fn expect_space(&mut self) {
+        let start = self.next_while(|c| c == ' ' || c == '\t' || c == '\n');
+        if start == self.pos {
+            panic!("expected <space>");
+        }
     }
 }
