@@ -4,6 +4,10 @@ enum Tok<'a> {
         name: &'a str,
         children: Vec<Tok<'a>>,
     },
+    CompTag {
+        name: &'a str,
+        children: Vec<Tok<'a>>,
+    },
     Text {
         cont: &'a str,
     },
@@ -38,15 +42,27 @@ impl Lexer {
             '<' => {
                 self.next();
 
+                let is_comp = self.eat('@');
                 let id = self.lex_id(src);
+
+                let mk_tag = |name, children| -> Tok {
+                    if is_comp {
+                        return Tok::CompTag {
+                            name,
+                            children
+                        };
+                    }
+
+                    Tok::Tag {
+                        name,
+                        children
+                    }
+                };
 
                 if self.eat('/') {
                     self.expect('>');
 
-                    return Tok::Tag {
-                        name: id,
-                        children: Vec::new(),
-                    };
+                    return mk_tag(id, Vec::new());
                 }
 
                 self.expect('>');
@@ -55,11 +71,16 @@ impl Lexer {
                 self.next_while(|c| matches!(c, ' ' | '\n'));
                 while self.curr() != '<' || self.peek() != '/' {
                     children.push(self.to_tok(src));
+                    self.next_while(|c| matches!(c, ' ' | '\n'));
                 }
 
                 if self.peek() == '/' {
                     self.expect('<');
                     self.next();
+
+                    if is_comp {
+                        self.expect('@');
+                    }
 
                     let id_close = self.lex_id(src);
                     if id != id_close {
@@ -70,10 +91,7 @@ impl Lexer {
 
                 self.next_while(|c| matches!(c, ' ' | '\n'));
 
-                Tok::Tag {
-                    name: id,
-                    children,
-                }
+                mk_tag(id, children)
             },
             _ => Tok::Text {
                 cont: self.lex_text(src)
@@ -138,6 +156,7 @@ impl Lexer {
 fn main() {
     let input = "<div>
         <h1>Foo</h1>
+        <@desc/>
     </div>";
     let mut lexer = Lexer::new(input);
     lexer.lex(&input);
