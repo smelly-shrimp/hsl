@@ -1,3 +1,5 @@
+use crate::tok::Tok;
+
 mod prim;
 
 pub struct Lexer {
@@ -13,7 +15,7 @@ impl Lexer {
         }
     }
 
-    pub fn lex(&mut self, src: &str) {
+    pub fn lex<'a>(&mut self, src: &'a str) -> Vec<Tok<'a>> {
         let mut toks = Vec::new();
 
         while !self.is_eof() {
@@ -21,6 +23,7 @@ impl Lexer {
         }
 
         println!("{:?}", toks);
+        toks
     }
 
     pub fn curr(&self) -> char {

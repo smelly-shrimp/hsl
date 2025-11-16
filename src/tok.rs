@@ -13,5 +13,4 @@ pub enum Tok<'a> {
     Text {
         cont: &'a str,
     },
-    Empty,
 }

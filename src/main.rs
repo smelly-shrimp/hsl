@@ -1,10 +1,11 @@
 use std::{env, fs::{self}};
 
-use crate::lexer::Lexer;
+use crate::{lexer::Lexer};
 
 mod log;
 mod tok;
 mod lexer;
+mod builder;
 
 fn main() {
     let mut args = env::args();
@@ -21,5 +22,9 @@ fn main() {
     log::ok(&format!("reading file `{}`", &fp));
 
     let mut lexer = Lexer::new(&fc);
-    lexer.lex(&fc);
+    let toks = lexer.lex(&fc);
+
+    for tok in toks {
+        println!("{}", tok);
+    }
 }
