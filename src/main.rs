@@ -2,6 +2,7 @@ use std::{env, fs::{self}};
 
 use crate::lexer::Lexer;
 
+mod log;
 mod tok;
 mod lexer;
 
@@ -10,17 +11,14 @@ fn main() {
     args.next();
 
     let fp = args.next().unwrap_or_else(|| {
-        panic!("no input file");
+        log::err("no input file");
     });
 
-    let Ok(fc) = fs::read_to_string(fp) else {
-        panic!("no such file");
+    let Ok(fc) = fs::read_to_string(&fp) else {
+        log::err(&format!("no file `{}`", &fp));
     };
 
-    // let input = r#"<div id="this-one" class="sth">
-    //     <h1>Foo</h1>
-    //     <@desc/>
-    // </div>"#;
+    log::ok(&format!("reading file `{}`", &fp));
 
     let mut lexer = Lexer::new(&fc);
     lexer.lex(&fc);
