@@ -26,38 +26,55 @@ impl Lexer {
         let mut toks = Vec::new();
 
         while !self.is_eof() {
-            match self.curr() {
-                '<' => {
-                    self.next();
-
-                    let id = self.lex_id(src);
-
-                    if self.curr() == '/' {
-                        self.next();
-                        self.expect('>');
-
-                        toks.push(Tok::Tag {
-                            name: id,
-                            children: Vec::new(),
-                        });
-
-                        continue;
-                    }
-
-                    self.expect('>');
-
-                    toks.push(Tok::Tag {
-                        name: id,
-                        children: Vec::new(),
-                    });
-                },
-                _ => toks.push(Tok::Text {
-                    cont: self.lex_text(src)
-                })
-            }
+            toks.push(self.to_tok(src));
         }
 
         println!("{:?}", toks);
+    }
+
+    fn to_tok<'a>(&mut self, src: &'a str) -> Tok<'a> {
+        match self.curr() {
+            '<' => {
+                self.next();
+
+                let id = self.lex_id(src);
+
+                // <h1/>
+                if self.eat('/') {
+                    self.expect('>');
+
+                    return Tok::Tag {
+                        name: id,
+                        children: Vec::new(),
+                    };
+                }
+
+                self.expect('>');
+
+                let mut children = Vec::new();
+                while self.curr() != '<' || self.peek() != '/' {
+                    children.push(self.to_tok(src));
+                }
+
+                if self.peek() == '/' {
+                    self.expect('<');
+                    self.next();
+                    let id_close = self.lex_id(src);
+                    if id != id_close {
+                        panic!("no corresponding closing tag");
+                    }
+                    self.expect('>');
+                }
+
+                Tok::Tag {
+                    name: id,
+                    children,
+                }
+            },
+            _ => Tok::Text {
+                cont: self.lex_text(src)
+            }
+        }
     }
 
     fn lex_id<'a>(&mut self, src: &'a str) -> &'a str {
@@ -70,13 +87,26 @@ impl Lexer {
         &src[start..self.pos]
     }
 
+    pub fn curr(&self) -> char {
+        *self.chars.get(self.pos).unwrap_or(&'\0')
+    }
+
     fn next(&mut self) -> char {
         self.pos += 1;
         *self.chars.get(self.pos - 1).unwrap_or(&'\0')
     }
 
-    pub fn curr(&self) -> char {
-        *self.chars.get(self.pos).unwrap_or(&'\0')
+    fn peek(&mut self) -> char {
+        *self.chars.get(self.pos + 1).unwrap_or(&'\0')
+    }
+
+    fn eat(&mut self, c: char) -> bool {
+        if self.curr() == c {
+            self.next();
+            return true;
+        }
+
+        false
     }
 
     fn is_eof(&self) -> bool {
@@ -102,8 +132,8 @@ impl Lexer {
 }
 
 fn main() {
-    let input = "<h1>Hello world!";
-    // let input = "<h1>";
+    // let input = "<h1>Hello world!</h1>";
+    let input = "<div><h1>Foo</h1></div>";
     let mut lexer = Lexer::new(input);
     lexer.lex(&input);
 }
