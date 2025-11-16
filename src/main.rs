@@ -1,91 +1,109 @@
-use std::{iter::Peekable, str::Chars};
-
 #[derive(Debug)]
-enum El<'a> {
-    Id(&'a str),
-    Text(&'a str),
-}
-
-#[derive(Debug)]
-struct Tag<'a> {
-    name: &'a str,
-}
-
-impl<'a> Tag<'a> {
-    fn new(name: &El<'a>) -> Self {
-        let El::Id(name) = name else {
-            panic!("name is expected to be ID");
-        };
-
-        Tag {
-            name,
-        }
+enum Tok<'a> {
+    Tag {
+        name: &'a str,
+        children: Vec<Tok<'a>>,
+    },
+    Text {
+        cont: &'a str,
     }
 }
 
-struct Lexer<'a> {
-    chars: Peekable<Chars<'a>>,
+struct Lexer {
+    chars: Vec<char>,
     pos: usize,
-    els: Vec<Tag<'a>>,
 }
 
-impl<'a> Lexer<'a> {
-    fn new(src: &'a str) -> Self {
+impl Lexer {
+    fn new(src: &str) -> Self {
         Self {
-            chars: src.chars().peekable(),
+            chars: src.chars().collect(),
             pos: 0,
-            els: Vec::new(),
         }
     }
 
-    fn lex(&mut self, src: &'a str) {
-        let mut tags = Vec::new();
+    fn lex(&mut self, src: &str) {
+        let mut toks = Vec::new();
 
-        while let Some(next) = self.next() {
-            if next == '<' {
-                let id = self.lex_id(src);
-                self.expect('>');
-                tags.push(Tag::new(&id));
+        while !self.is_eof() {
+            match self.curr() {
+                '<' => {
+                    self.next();
+
+                    let id = self.lex_id(src);
+
+                    if self.curr() == '/' {
+                        self.next();
+                        self.expect('>');
+
+                        toks.push(Tok::Tag {
+                            name: id,
+                            children: Vec::new(),
+                        });
+
+                        continue;
+                    }
+
+                    self.expect('>');
+
+                    toks.push(Tok::Tag {
+                        name: id,
+                        children: Vec::new(),
+                    });
+                },
+                _ => toks.push(Tok::Text {
+                    cont: self.lex_text(src)
+                })
             }
         }
 
-        println!("{:?}", tags);
+        println!("{:?}", toks);
     }
 
-    fn lex_id(&mut self, src: &'a str) -> El<'a> {
-        let start = self.pos;
-        while let Some(next) = self.peek() {
-            if !next.is_alphanumeric() {
-                break;
-            }
-
-            self.next();
-        }
-
-        El::Id(&src[start..self.pos])
+    fn lex_id<'a>(&mut self, src: &'a str) -> &'a str {
+        let start = self.next_until(|c| c.is_alphanumeric());
+        &src[start..self.pos]
     }
 
-    fn next(&mut self) -> Option<char> {
+    fn lex_text<'a>(&mut self, src: &'a str) -> &'a str {
+        let start = self.next_until(|c| c != '<');
+        &src[start..self.pos]
+    }
+
+    fn next(&mut self) -> char {
         self.pos += 1;
-        self.chars.next()
+        *self.chars.get(self.pos - 1).unwrap_or(&'\0')
     }
 
-    fn peek(&mut self) -> Option<&char> {
-        self.chars.peek()
+    pub fn curr(&self) -> char {
+        *self.chars.get(self.pos).unwrap_or(&'\0')
+    }
+
+    fn is_eof(&self) -> bool {
+        self.curr() == '\0'
     }
 
     fn expect(&mut self, c: char) {
-        if let Some(next) = self.next() {
-            if next != c {
-                panic!("expected {}, got {}", c, next);
-            }
+        let next = self.next();
+        if next != c {
+            panic!("expected `{}`, got `{}`", c, next);
         }
+    }
+
+    fn next_until(&mut self, is_char: impl Fn(char) -> bool) -> usize {
+        let start = self.pos;
+
+        while !self.is_eof() && is_char(self.curr()) {
+            self.next();
+        }
+
+        start
     }
 }
 
 fn main() {
-    // let input = "<h1>Hello world!</h1>";
-    let input = "<h1>";
+    let input = "<h1>Hello world!";
+    // let input = "<h1>";
     let mut lexer = Lexer::new(input);
     lexer.lex(&input);
 }
