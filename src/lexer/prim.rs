@@ -4,7 +4,7 @@ impl Lexer {
     pub fn to_tok<'a>(&mut self, src: &'a str) -> Tok<'a> {
         if !self.eat('<') {
             return Tok::Text {
-                cont: self.lex_text(src)
+                cont: self.lex_text(src),
             };
         }
 
@@ -89,9 +89,7 @@ impl Lexer {
             self.expect_space();
 
             let key = self.lex_id(src);
-            let val = if self.eat('=') {
-                self.lex_val(src)
-            } else { "" };
+            let val = if self.eat('=') { self.lex_val(src) } else { "" };
 
             attrs.push((key, val));
         }

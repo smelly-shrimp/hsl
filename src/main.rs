@@ -1,13 +1,19 @@
-use std::{env, fs::{self}};
+use std::{
+    env,
+    fs::{self},
+    time::Instant,
+};
 
-use crate::{lexer::Lexer};
+use crate::lexer::Lexer;
 
+mod builder;
+mod lexer;
 mod log;
 mod tok;
-mod lexer;
-mod builder;
 
 fn main() {
+    let start = Instant::now();
+
     let mut args = env::args();
     args.next();
 
@@ -19,10 +25,13 @@ fn main() {
         log::err(&format!("no file `{}`", &fp));
     };
 
-    log::ok(&format!("reading file `{}`", &fp));
+    log::ok(&format!("read file `{}` in {:?}", &fp, start.elapsed()));
+    let start = Instant::now();
 
     let mut lexer = Lexer::new(&fc);
     let toks = lexer.lex(&fc);
+
+    log::ok(&format!("lexed files in {:?}", start.elapsed()));
 
     for tok in toks {
         println!("{}", tok);
