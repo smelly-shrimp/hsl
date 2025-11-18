@@ -68,4 +68,15 @@ impl Lexer {
 
         start
     }
+
+    pub fn eat_space(&mut self) {
+        self.next_while(|c| c == ' ' || c == '\t' || c == '\n');
+    }
+
+    pub fn expect_space(&mut self) {
+        let start = self.next_while(|c| c == ' ' || c == '\t' || c == '\n');
+        if start == self.pos {
+            panic!("expected <space>");
+        }
+    }
 }
