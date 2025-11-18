@@ -2,6 +2,9 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum Tok<'a> {
+    Doctype {
+        cont: String,
+    },
     Tag {
         name: &'a str,
         attrs: Vec<(&'a str, &'a str)>,
@@ -10,14 +13,6 @@ pub enum Tok<'a> {
     VoidTag {
         name: &'a str,
         attrs: Vec<(&'a str, &'a str)>,
-    },
-    Doctype {
-        cont: String,
-    },
-    CompTag {
-        name: &'a str,
-        attrs: Vec<(&'a str, &'a str)>,
-        children: Vec<Tok<'a>>,
     },
     Text {
         cont: &'a str,
@@ -53,11 +48,8 @@ impl<'a> Display for Tok<'a> {
             Self::VoidTag { name, attrs } => {
                 let attrs = fmt_attrs(attrs);
                 write!(f, "<{}{}>", name, attrs)
-            },
-            Self::Doctype { cont } => write!(f, "<!{}>", cont),
-            Self::CompTag { name, .. } => {
-                write!(f, "<@{}></@{}>", name, name)
             }
+            Self::Doctype { cont } => write!(f, "<!{}>", cont),
             Self::Text { cont } => write!(f, "{}", cont),
         }
     }

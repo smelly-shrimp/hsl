@@ -14,31 +14,17 @@ impl Lexer {
             return Tok::Doctype { cont: cont.into() };
         }
 
-        let is_comp = self.eat('@');
-        let id = self.lex_id(src);
-
+        let name = self.lex_id(src);
         let attrs = self.lex_attrs(src);
-
-        let mk_tag = |name, children| -> Tok {
-            if is_comp {
-                return Tok::CompTag {
-                    name,
-                    attrs,
-                    children,
-                };
-            }
-
-            Tok::Tag {
-                name,
-                attrs,
-                children,
-            }
-        };
 
         if self.eat('/') {
             self.expect('>');
 
-            return mk_tag(id, Vec::new());
+            return Tok::Tag {
+                name,
+                attrs,
+                children: Vec::new(),
+            };
         }
 
         self.expect('>');
@@ -54,12 +40,8 @@ impl Lexer {
             self.expect('<');
             self.next();
 
-            if is_comp {
-                self.expect('@');
-            }
-
             let id_close = self.lex_id(src);
-            if id != id_close {
+            if name != id_close {
                 panic!("no corresponding closing tag");
             }
             self.expect('>');
@@ -67,7 +49,11 @@ impl Lexer {
 
         self.eat_space();
 
-        mk_tag(id, children)
+        Tok::Tag {
+            name,
+            attrs,
+            children,
+        }
     }
 
     fn lex_id<'a>(&mut self, src: &'a str) -> &'a str {
