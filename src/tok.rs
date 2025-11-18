@@ -7,6 +7,10 @@ pub enum Tok<'a> {
         attrs: Vec<(&'a str, &'a str)>,
         children: Vec<Tok<'a>>,
     },
+    VoidTag {
+        name: &'a str,
+        attrs: Vec<(&'a str, &'a str)>,
+    },
     Doctype {
         cont: String,
     },
@@ -20,6 +24,20 @@ pub enum Tok<'a> {
     },
 }
 
+fn fmt_attrs(attrs: &Vec<(&str, &str)>) -> String {
+    attrs
+        .iter()
+        .map(|(key, val)| format!(" {}=\"{}\"", key, val))
+        .collect::<String>()
+}
+
+fn fmt_children(children: &Vec<Tok>) -> String {
+    children
+        .iter()
+        .map(|tok| format!("{}", tok))
+        .collect::<String>()
+}
+
 impl<'a> Display for Tok<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -28,21 +46,14 @@ impl<'a> Display for Tok<'a> {
                 attrs,
                 children,
             } => {
-                let f_attrs = attrs
-                    .iter()
-                    .map(|(key, val)| format!(" {}=\"{}\"", key, val))
-                    .collect::<String>();
-
-                let mut f_children = String::new();
-                f_children.push_str(
-                    &children
-                        .iter()
-                        .map(|tok| format!("{}", tok))
-                        .collect::<String>(),
-                );
-
-                write!(f, "<{}{}>\n{}\n</{}>", name, f_attrs, f_children, name)
+                let attrs = fmt_attrs(attrs);
+                let children = fmt_children(children);
+                write!(f, "<{}{}>\n{}\n</{}>", name, attrs, children, name)
             }
+            Self::VoidTag { name, attrs } => {
+                let attrs = fmt_attrs(attrs);
+                write!(f, "<{}{}>", name, attrs)
+            },
             Self::Doctype { cont } => write!(f, "<!{}>", cont),
             Self::CompTag { name, .. } => {
                 write!(f, "<@{}></@{}>", name, name)
