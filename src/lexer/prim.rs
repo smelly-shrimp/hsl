@@ -8,6 +8,12 @@ impl Lexer {
             };
         }
 
+        if self.eat('!') {
+            let cont = self.lex_doctype(src);
+            self.expect('>');
+            return Tok::Doctype { cont: cont.into() };
+        }
+
         let is_comp = self.eat('@');
         let id = self.lex_id(src);
 
@@ -95,6 +101,11 @@ impl Lexer {
         }
 
         attrs
+    }
+
+    fn lex_doctype<'a>(&mut self, src: &'a str) -> &'a str {
+        let start = self.next_while(|c| c != '>');
+        &src[start..self.pos]
     }
 
     fn eat_space(&mut self) {

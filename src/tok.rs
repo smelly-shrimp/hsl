@@ -7,6 +7,9 @@ pub enum Tok<'a> {
         attrs: Vec<(&'a str, &'a str)>,
         children: Vec<Tok<'a>>,
     },
+    Doctype {
+        cont: String,
+    },
     CompTag {
         name: &'a str,
         attrs: Vec<(&'a str, &'a str)>,
@@ -40,12 +43,11 @@ impl<'a> Display for Tok<'a> {
 
                 write!(f, "<{}{}>\n{}\n</{}>", name, f_attrs, f_children, name)
             }
+            Self::Doctype { cont } => write!(f, "<!{}>", cont),
             Self::CompTag { name, .. } => {
                 write!(f, "<@{}></@{}>", name, name)
             }
-            Self::Text { cont } => {
-                write!(f, "{}", cont)
-            }
+            Self::Text { cont } => write!(f, "{}", cont),
         }
     }
 }
