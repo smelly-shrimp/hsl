@@ -1,4 +1,7 @@
-use crate::{lexer::Lexer, tok::Tok};
+use crate::{
+    lexer::Lexer,
+    tok::{IsVoid, Tok},
+};
 
 impl Lexer {
     pub fn to_tok<'a>(&mut self, src: &'a str) -> Tok<'a> {
@@ -16,6 +19,10 @@ impl Lexer {
 
         let name = self.lex_id(src);
         let attrs = self.lex_attrs(src);
+
+        if name.is_void() {
+            return Tok::VoidTag { name, attrs };
+        }
 
         if self.eat('/') {
             self.expect('>');

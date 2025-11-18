@@ -54,3 +54,28 @@ impl<'a> Display for Tok<'a> {
         }
     }
 }
+
+pub trait IsVoid {
+    fn is_void(&self) -> bool;
+}
+
+impl IsVoid for str {
+    fn is_void(&self) -> bool {
+        matches!(
+            self,
+            "area"
+                | "base"
+                | "br"
+                | "col"
+                | "embed"
+                | "hr"
+                | "img"
+                | "input"
+                | "link"
+                | "meta"
+                | "source"
+                | "track"
+                | "wbr"
+        )
+    }
+}
