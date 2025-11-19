@@ -32,7 +32,9 @@ fn main() {
 
     log::ok(&format!("lexed files in {:?}", start.elapsed()));
 
+    println!("\x1b[1;34m--- output:\x1b[0m");
     for tok in toks {
-        println!("{}", tok);
+        print!("{}", tok);
     }
+    println!("");
 }

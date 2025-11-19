@@ -5,6 +5,8 @@ use crate::{
 
 impl Lexer {
     pub fn to_tok<'a>(&mut self, src: &'a str) -> Tok<'a> {
+        // self.eat_space();
+
         if !self.eat('<') {
             return Tok::Text {
                 cont: self.lex_text(src),
@@ -21,6 +23,7 @@ impl Lexer {
         let attrs = self.lex_attrs(src);
 
         if name.is_void() {
+            self.expect('>');
             return Tok::VoidTag { name, attrs };
         }
 
@@ -37,10 +40,10 @@ impl Lexer {
         self.expect('>');
 
         let mut children = Vec::new();
-        self.eat_space();
+        // self.eat_space();
         while self.curr() != '<' || self.peek() != '/' {
             children.push(self.to_tok(src));
-            self.eat_space();
+            // self.eat_space();
         }
 
         if self.peek() == '/' {
@@ -54,7 +57,7 @@ impl Lexer {
             self.expect('>');
         }
 
-        self.eat_space();
+        // self.eat_space();
 
         Tok::Tag {
             name,

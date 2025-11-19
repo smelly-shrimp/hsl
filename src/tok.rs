@@ -43,14 +43,14 @@ impl<'a> Display for Tok<'a> {
             } => {
                 let attrs = fmt_attrs(attrs);
                 let children = fmt_children(children);
-                write!(f, "<{}{}>\n{}\n</{}>", name, attrs, children, name)
+                write!(f, "<{}{}>{}</{}>", name, attrs, children, name)
             }
             Self::VoidTag { name, attrs } => {
                 let attrs = fmt_attrs(attrs);
                 write!(f, "<{}{}>", name, attrs)
             }
             Self::Doctype { cont } => write!(f, "<!{}>", cont),
-            Self::Text { cont } => write!(f, "{}", cont),
+            Self::Text { cont } => write!(f, "{}", cont.trim()),
         }
     }
 }
