@@ -1,4 +1,6 @@
-use std::fmt::Display;
+use std::{fmt::Display, fs};
+
+use crate::log;
 
 #[derive(Debug)]
 pub enum Tok<'a> {
@@ -36,6 +38,18 @@ impl<'a> Display for Tok<'a> {
             } => {
                 let f_attrs = fmt_attrs(attrs);
                 let f_children = fmt_children(children);
+
+                if name == &"include" {
+                    let Some((_, path)) = attrs.iter().find(|(name, _)| name == &"src") else {
+                        log::err("no src attribute inside <include>");
+                    };
+
+                    let Ok(cont) = fs::read_to_string(path) else {
+                        log::err(&format!("no file `{}`", path));
+                    };
+
+                    return write!(f, "{}", cont);
+                }
 
                 let mut sep = "\n";
 
