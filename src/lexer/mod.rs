@@ -15,7 +15,7 @@ impl Lexer {
         }
     }
 
-    pub fn lex<'a>(&mut self, src: &'a str) -> Vec<Tok<'a>> {
+    pub fn lex<'a>(&mut self, src: &'a str) -> Tok<'a> {
         let mut toks = Vec::new();
 
         while !self.is_eof() {
@@ -23,7 +23,7 @@ impl Lexer {
         }
 
         println!("{:?}", toks);
-        toks
+        Tok::Root { children: toks }
     }
 
     pub fn curr(&self) -> char {

@@ -28,13 +28,9 @@ fn main() {
     let start = Instant::now();
 
     let mut lexer = Lexer::new(&fc);
-    let toks = lexer.lex(&fc);
+    let root = lexer.lex(&fc);
 
     log::ok(&format!("lexed files in {:?}", start.elapsed()));
 
-    println!("\x1b[1;34m--- output:\x1b[0m");
-    for tok in toks {
-        print!("{}", tok);
-    }
-    println!("");
+    println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);
 }

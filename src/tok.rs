@@ -2,6 +2,9 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum Tok<'a> {
+    Root {
+        children: Vec<Tok<'a>>,
+    },
     Doctype {
         cont: String,
     },
@@ -36,6 +39,10 @@ fn fmt_children(children: &Vec<Tok>) -> String {
 impl<'a> Display for Tok<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::Root { children } => {
+                let children = fmt_children(children);
+                write!(f, "{}", children)
+            },
             Self::Tag {
                 name,
                 attrs,
