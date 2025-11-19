@@ -22,6 +22,49 @@ pub enum Tok<'a> {
     },
 }
 
+impl<'a> Display for Tok<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Root { children } => {
+                let children = fmt_children(children);
+                write!(f, "{}", children)
+            }
+            Self::Tag {
+                name,
+                attrs,
+                children,
+            } => {
+                let f_attrs = fmt_attrs(attrs);
+                let f_children = fmt_children(children);
+
+                let mut sep = "\n";
+
+                if f_children.is_empty() {
+                    sep = "";
+                }
+
+                if children.len() == 1
+                    && let Tok::Text { .. } = children[0]
+                {
+                    sep = "";
+                }
+
+                write!(
+                    f,
+                    "<{}{}>{}{}{}</{}>",
+                    name, f_attrs, sep, f_children, sep, name
+                )
+            }
+            Self::VoidTag { name, attrs } => {
+                let attrs = fmt_attrs(attrs);
+                write!(f, "<{}{}>\n", name, attrs)
+            }
+            Self::Doctype { cont } => write!(f, "<!{}>", cont),
+            Self::Text { cont } => write!(f, "{}", cont.trim()),
+        }
+    }
+}
+
 fn fmt_attrs(attrs: &Vec<(&str, &str)>) -> String {
     attrs
         .iter()
@@ -34,32 +77,6 @@ fn fmt_children(children: &Vec<Tok>) -> String {
         .iter()
         .map(|tok| format!("{}", tok))
         .collect::<String>()
-}
-
-impl<'a> Display for Tok<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Root { children } => {
-                let children = fmt_children(children);
-                write!(f, "{}", children)
-            },
-            Self::Tag {
-                name,
-                attrs,
-                children,
-            } => {
-                let attrs = fmt_attrs(attrs);
-                let children = fmt_children(children);
-                write!(f, "<{}{}>{}</{}>", name, attrs, children, name)
-            }
-            Self::VoidTag { name, attrs } => {
-                let attrs = fmt_attrs(attrs);
-                write!(f, "<{}{}>", name, attrs)
-            }
-            Self::Doctype { cont } => write!(f, "<!{}>", cont),
-            Self::Text { cont } => write!(f, "{}", cont.trim()),
-        }
-    }
 }
 
 pub trait IsVoid {
