@@ -6,6 +6,7 @@ use std::{
 
 use crate::lexer::Lexer;
 
+mod src;
 mod lexer;
 mod log;
 mod tok;
