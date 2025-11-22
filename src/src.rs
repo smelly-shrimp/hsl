@@ -19,7 +19,7 @@ impl SrcMan {
         self.srcs.len().saturating_sub(1)
     }
 
-    pub fn src(&mut self, sid: usize) -> &str {
+    pub fn src(&self, sid: usize) -> &str {
         &self.srcs.get(sid).expect("HANDLE ERR! no-src").cont
     }
 }

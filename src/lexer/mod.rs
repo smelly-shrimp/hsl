@@ -1,10 +1,10 @@
-use crate::{cur::Cur, src::SrcMan, tok::Tok};
+use crate::{cur::Cur, src::SrcMan, tok::{Span, Tok}};
 
 mod prim;
 
 pub struct Lexer<'a> {
     sm: &'a mut SrcMan,
-    cur: Vec<Cur>,
+    curs: Vec<Cur>,
     // remove
     chars: Vec<char>,
     pos: usize,
@@ -14,7 +14,7 @@ impl<'a> Lexer<'a> {
     pub fn new(sm: &'a mut SrcMan, sid: usize, src: &str) -> Self {
         Self {
             sm,
-            cur: vec![ Cur::new(sid) ],
+            curs: vec![ Cur::new(sid) ],
             chars: src.chars().collect(),
             pos: 0,
         }
@@ -29,6 +29,16 @@ impl<'a> Lexer<'a> {
 
         println!("{:?}", toks);
         Tok::Root { children: toks }
+    }
+
+    pub fn sid(&self) -> usize {
+        let cur = self.curs.last().expect("HANDLE ERR! no-cur");
+        cur.sid()
+    }
+
+    pub fn text(&self, span: &Span) -> &str {
+        let cont = self.sm.src(span.0);
+        cont.get(span.1..span.2).expect("HANDLE ERR! out-of-bounds")
     }
 
     pub fn curr(&self) -> char {

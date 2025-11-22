@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub struct Span(usize, usize);
+pub struct Span(pub usize, pub usize, pub usize);
 
 #[derive(Debug)]
 pub enum Tok {
