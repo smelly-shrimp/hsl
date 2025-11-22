@@ -14,7 +14,7 @@ impl SrcMan {
         Self { srcs: Vec::new() }
     }
 
-    pub fn load(&mut self, path: &str) -> usize {
+    pub fn load(&mut self, path: String) -> usize {
         self.srcs.push(Src::new(path));
         self.srcs.len().saturating_sub(1)
     }
@@ -25,10 +25,10 @@ impl SrcMan {
 }
 
 impl Src {
-    fn new(path: &str) -> Self {
-        let cont = fs::read_to_string(path).expect("HANDLE ERR! no-file");
+    fn new(path: String) -> Self {
+        let cont = fs::read_to_string(&path).expect("HANDLE ERR! no-file");
         Self {
-            path: path.into(),
+            path: path,
             cont,
         }
     }

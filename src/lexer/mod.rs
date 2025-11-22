@@ -20,14 +20,15 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex(&mut self, src: &str) -> Tok {
+    pub fn lex(&mut self) -> Tok {
         let mut toks = Vec::new();
 
         while !self.is_eof() {
-            toks.push(self.to_tok(src));
+            toks.push(self.to_tok());
         }
 
         println!("{:?}", toks);
+        self.curs.pop();
         Tok::Root { children: toks }
     }
 

@@ -1,7 +1,6 @@
 use std::{
     env,
     fs::{self},
-    time::Instant,
 };
 
 use crate::{lexer::Lexer, src::SrcMan};
@@ -13,8 +12,6 @@ mod src;
 mod tok;
 
 fn main() {
-    let start = Instant::now();
-
     let mut args = env::args();
     args.next();
 
@@ -27,15 +24,10 @@ fn main() {
     };
 
     let mut sm = SrcMan::new();
-    let sid = sm.load(&fp);
-
-    log::ok(&format!("read file `{}` in {:?}", &fp, start.elapsed()));
-    let start = Instant::now();
+    let sid = sm.load(fp);
 
     let mut lexer = Lexer::new(&mut sm, sid, &fc);
-    let _ = lexer.lex(&fc);
-
-    log::ok(&format!("lexed files in {:?}", start.elapsed()));
+    let _ = lexer.lex();
 
     // println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);
 }

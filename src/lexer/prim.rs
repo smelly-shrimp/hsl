@@ -1,10 +1,9 @@
 use crate::{
-    lexer::Lexer,
-    tok::{IsVoid, Span, Tok},
+    cur::Cur, lexer::Lexer, tok::{IsVoid, Span, Tok}
 };
 
 impl<'a> Lexer<'a> {
-    pub fn to_tok(&mut self, src: &str) -> Tok {
+    pub fn to_tok(&mut self) -> Tok {
         if !self.eat('<') {
             return Tok::Text {
                 cont: self.lex_text(),
@@ -19,6 +18,16 @@ impl<'a> Lexer<'a> {
 
         let name = self.lex_id();
         let attrs = self.lex_attrs();
+
+        if self.text(&name) == "include" {
+            for (key, val) in &attrs {
+                if self.text(&key) == "src" {
+                    let sid = self.sm.load(String::from(self.text(&val)));
+                    self.curs.push(Cur::new(sid));
+                    // lex
+                }
+            }
+        }
 
         if self.text(&name).is_void() {
             self.expect('>');
@@ -39,7 +48,7 @@ impl<'a> Lexer<'a> {
 
         let mut children = Vec::new();
         while !self.is_eof() && (self.curr() != '<' || self.peek() != '/') {
-            children.push(self.to_tok(src));
+            children.push(self.to_tok());
         }
 
         if self.peek() == '/' {
