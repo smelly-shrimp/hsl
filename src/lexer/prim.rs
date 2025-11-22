@@ -6,6 +6,8 @@ use crate::{
 
 impl<'a> Lexer<'a> {
     pub fn to_tok(&mut self) -> Tok {
+        let mut is_closed = false;
+
         if !self.eat("<") {
             return Tok::Text {
                 cont: self.lex_text(),
@@ -20,16 +22,7 @@ impl<'a> Lexer<'a> {
 
         let name = self.lex_id();
         let attrs = self.lex_attrs();
-
-        if self.text(&name) == "include" {
-            for (key, val) in &attrs {
-                if self.text(&key) == "src" {
-                    let sid = self.sm.load(String::from(self.text(&val)));
-                    self.curs.push(Cur::new(sid));
-                    // lex
-                }
-            }
-        }
+        let mut children = Vec::new();
 
         if self.text(&name).is_void() {
             self.expect(">");
@@ -37,37 +30,34 @@ impl<'a> Lexer<'a> {
         }
 
         if self.eat("/") {
-            self.expect(">");
-
-            return Tok::Tag {
-                name,
-                attrs,
-                children: Vec::new(),
-            };
+            is_closed = true;
         }
 
-        self.expect(">");
+        if !is_closed {
+            while !self.is_eof() && (self.curr() != "<" || self.peek() != "/") {
+                children.push(self.to_tok());
+            }
 
-        let mut children = Vec::new();
-        while !self.is_eof() && (self.curr() != "<" || self.peek() != "/") {
-            children.push(self.to_tok());
-        }
-
-        if self.peek() == "/" {
             self.expect("<");
-            self.next();
-
+            self.expect("/");
             let name_close = self.lex_id();
 
             if self.text(&name) != self.text(&name_close) {
                 panic!("no corresponding closing tag");
             }
-            self.expect(">");
         }
 
-        // if self.is_eof() {
-        //     panic!("no corresponding closing tag");
-        // }
+        self.expect(">");
+
+        if self.text(&name) == "include" {
+            for (key, val) in &attrs {
+                if self.text(&key) == "src" {
+                    let sid = self.sm.load(String::from(self.text(&val)));
+                    self.curs.push(Cur::new(sid));
+                    return self.lex();
+                }
+            }
+        }
 
         Tok::Tag {
             name,
@@ -77,7 +67,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn lex_id(&mut self) -> Span {
-        let start = self.next_while(|s| s.as_bytes()[0].is_ascii_alphanumeric());
+        let start =
+            self.next_while(|s| s.as_bytes()[0].is_ascii_alphanumeric());
         Span(self.sid(), start, self.pos())
     }
 

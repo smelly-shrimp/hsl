@@ -26,7 +26,6 @@ impl<'a> Lexer<'a> {
             toks.push(self.to_tok());
         }
 
-        println!("{:?}", toks);
         self.curs.pop();
         Tok::Root { children: toks }
     }

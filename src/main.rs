@@ -1,6 +1,4 @@
-use std::{
-    env,
-};
+use std::env;
 
 use crate::{lexer::Lexer, src::SrcMan};
 
@@ -22,7 +20,8 @@ fn main() {
     let sid = sm.load(fp);
 
     let mut lexer = Lexer::new(&mut sm, sid);
-    let _ = lexer.lex();
+    let root = lexer.lex();
+    println!("{:?}", root);
 
     // println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);
 }
