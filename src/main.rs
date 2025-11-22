@@ -4,7 +4,7 @@ use std::{
     time::Instant,
 };
 
-use crate::lexer::Lexer;
+use crate::{lexer::Lexer, src::SrcMan};
 
 mod src;
 mod lexer;
@@ -25,13 +25,16 @@ fn main() {
         log::err(&format!("no file `{}`", &fp));
     };
 
+    let mut sm = SrcMan::new();
+    sm.load(&fp);
+
     log::ok(&format!("read file `{}` in {:?}", &fp, start.elapsed()));
     let start = Instant::now();
 
     let mut lexer = Lexer::new(&fc);
-    let root = lexer.lex(&fc);
+    let _ = lexer.lex(&fc);
 
     log::ok(&format!("lexed files in {:?}", start.elapsed()));
 
-    println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);
+    // println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);
 }

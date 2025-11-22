@@ -10,13 +10,13 @@ pub struct Src {
 }
 
 impl SrcMan {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             srcs: Vec::new(),
         }
     }
 
-    fn load(&mut self, path: &str) {
+    pub fn load(&mut self, path: &str) {
         self.srcs.push(Src::new(path));
     }
 }
