@@ -1,6 +1,5 @@
 use std::{
     env,
-    fs::{self},
 };
 
 use crate::{lexer::Lexer, src::SrcMan};
@@ -19,14 +18,10 @@ fn main() {
         log::err("no input file");
     });
 
-    let Ok(fc) = fs::read_to_string(&fp) else {
-        log::err(&format!("no file `{}`", &fp));
-    };
-
     let mut sm = SrcMan::new();
     let sid = sm.load(fp);
 
-    let mut lexer = Lexer::new(&mut sm, sid, &fc);
+    let mut lexer = Lexer::new(&mut sm, sid);
     let _ = lexer.lex();
 
     // println!("\x1b[1;34m--- output:\x1b[0m\n{}", root);

@@ -11,4 +11,12 @@ impl Cur {
     pub fn sid(&self) -> usize {
         self.sid
     }
+
+    pub fn pos(&self) -> usize {
+        self.pos
+    }
+
+    pub fn inc_pos(&mut self) {
+        self.pos += 1;
+    }
 }
