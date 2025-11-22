@@ -91,6 +91,10 @@ impl Lexer {
             self.expect_space();
 
             let key = self.lex_id(src);
+            if key.is_empty() {
+                return attrs;
+            }
+
             let val = if self.eat('=') { self.lex_val(src) } else { "" };
 
             attrs.push((key, val));
