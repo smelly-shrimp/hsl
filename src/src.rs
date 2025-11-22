@@ -11,13 +11,16 @@ pub struct Src {
 
 impl SrcMan {
     pub fn new() -> Self {
-        Self {
-            srcs: Vec::new(),
-        }
+        Self { srcs: Vec::new() }
     }
 
-    pub fn load(&mut self, path: &str) {
+    pub fn load(&mut self, path: &str) -> usize {
         self.srcs.push(Src::new(path));
+        self.srcs.len().saturating_sub(1)
+    }
+
+    pub fn src(&mut self, sid: usize) -> &str {
+        &self.srcs.get(sid).expect("HANDLE ERR! no-src").cont
     }
 }
 

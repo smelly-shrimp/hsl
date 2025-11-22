@@ -6,9 +6,10 @@ use std::{
 
 use crate::{lexer::Lexer, src::SrcMan};
 
-mod src;
+mod cur;
 mod lexer;
 mod log;
+mod src;
 mod tok;
 
 fn main() {
@@ -26,12 +27,12 @@ fn main() {
     };
 
     let mut sm = SrcMan::new();
-    sm.load(&fp);
+    let sid = sm.load(&fp);
 
     log::ok(&format!("read file `{}` in {:?}", &fp, start.elapsed()));
     let start = Instant::now();
 
-    let mut lexer = Lexer::new(&fc);
+    let mut lexer = Lexer::new(&mut sm, sid, &fc);
     let _ = lexer.lex(&fc);
 
     log::ok(&format!("lexed files in {:?}", start.elapsed()));

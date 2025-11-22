@@ -1,21 +1,26 @@
-use crate::tok::Tok;
+use crate::{cur::Cur, src::SrcMan, tok::Tok};
 
 mod prim;
 
-pub struct Lexer {
+pub struct Lexer<'a> {
+    sm: &'a mut SrcMan,
+    cur: Vec<Cur>,
+    // remove
     chars: Vec<char>,
     pos: usize,
 }
 
-impl Lexer {
-    pub fn new(src: &str) -> Self {
+impl<'a> Lexer<'a> {
+    pub fn new(sm: &'a mut SrcMan, sid: usize, src: &str) -> Self {
         Self {
+            sm,
+            cur: vec![ Cur::new(sid) ],
             chars: src.chars().collect(),
             pos: 0,
         }
     }
 
-    pub fn lex<'a>(&mut self, src: &'a str) -> Tok<'a> {
+    pub fn lex(&mut self, src: &str) -> Tok {
         let mut toks = Vec::new();
 
         while !self.is_eof() {

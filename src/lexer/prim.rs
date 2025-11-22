@@ -1,10 +1,10 @@
 use crate::{
     lexer::Lexer,
-    tok::{IsVoid, Tok},
+    tok::{IsVoid, Span, Tok},
 };
 
 impl Lexer {
-    pub fn to_tok<'a>(&mut self, src: &'a str) -> Tok<'a> {
+    pub fn to_tok(&mut self, src: &str) -> Tok {
         if !self.eat('<') {
             return Tok::Text {
                 cont: self.lex_text(src),
@@ -64,17 +64,17 @@ impl Lexer {
         }
     }
 
-    fn lex_id<'a>(&mut self, src: &'a str) -> &'a str {
+    fn lex_id(&mut self, src: &str) -> &str {
         let start = self.next_while(|c| c.is_alphanumeric());
         &src[start..self.pos]
     }
 
-    fn lex_text<'a>(&mut self, src: &'a str) -> &'a str {
+    fn lex_text(&mut self, src: &str) -> Span {
         let start = self.next_while(|c| c != '<');
         &src[start..self.pos]
     }
 
-    fn lex_val<'a>(&mut self, src: &'a str) -> &'a str {
+    fn lex_val(&mut self, src: &str) -> &str {
         self.expect('"');
         let start = self.next_while(|c| c != '"');
         self.expect('"');
@@ -82,7 +82,7 @@ impl Lexer {
         &src[start..self.pos - 1]
     }
 
-    fn lex_attrs<'a>(&mut self, src: &'a str) -> Vec<(&'a str, &'a str)> {
+    fn lex_attrs(&mut self, src: &str) -> Vec<(&str, &str)> {
         let mut attrs = Vec::new();
 
         while self.curr() != '>' && self.curr() != '/' {
@@ -101,7 +101,7 @@ impl Lexer {
         attrs
     }
 
-    fn lex_doctype<'a>(&mut self, src: &'a str) -> &'a str {
+    fn lex_doctype(&mut self, src: &str) -> &str {
         let start = self.next_while(|c| c != '>');
         &src[start..self.pos]
     }
