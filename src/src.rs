@@ -1,5 +1,7 @@
 use std::fs;
 
+use crate::tok::Span;
+
 pub struct SrcMan {
     srcs: Vec<Src>,
 }
@@ -21,6 +23,11 @@ impl SrcMan {
 
     pub fn src(&self, sid: usize) -> &str {
         &self.srcs.get(sid).expect("HANDLE ERR! no-src").cont
+    }
+
+    pub fn slice(&self, span: &Span) -> &str {
+        let cont = self.src(span.0);
+        cont.get(span.1..span.2).expect("HANDLE ERR! out-of-bounds")
     }
 }
 

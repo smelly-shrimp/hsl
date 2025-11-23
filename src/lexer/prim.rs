@@ -77,7 +77,7 @@ impl<'a> Lexer<'a> {
 
         while !self.is_eof() && self.curr() != "<" {
             let s = self.next();
-            
+
             if s == "{" {
                 parts.push(part.clone());
 
