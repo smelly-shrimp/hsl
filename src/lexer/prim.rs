@@ -9,7 +9,9 @@ impl<'a> Lexer<'a> {
         let mut is_closed = false;
 
         if !self.eat("<") {
-            return self.lex_text();
+            return Tok::Text {
+                parts: self.lex_text("<"),
+            };
         }
 
         if self.eat("!") {
@@ -50,7 +52,9 @@ impl<'a> Lexer<'a> {
         if self.text(&name) == "include" {
             for (key, val) in &attrs {
                 if self.text(&key) == "src" {
-                    let sid = self.sm.load(String::from(self.text(&val)));
+                    let sid = self.sm.load(String::from(
+                        self.text(&val.get(0).expect("HANDLE ERR! no-path")),
+                    ));
                     self.curs.push(Cur::new(sid, attrs));
                     return self.lex();
                 }
@@ -72,12 +76,12 @@ impl<'a> Lexer<'a> {
         Span(self.sid(), start, self.pos())
     }
 
-    fn lex_text(&mut self) -> Tok {
+    fn lex_text(&mut self, end: &str) -> Vec<Span> {
         let start = self.pos();
         let mut parts = Vec::new();
         let mut part = Span(self.sid(), start, start);
 
-        while !self.is_eof() && self.curr() != "<" {
+        while !self.is_eof() && self.curr() != end {
             let s = self.next();
 
             if s == "{" {
@@ -85,8 +89,9 @@ impl<'a> Lexer<'a> {
 
                 let attr_key = self.lex_id();
                 let attr_key = self.sm.slice(&attr_key);
-                let attr = self.find_attr(attr_key);
-                parts.push(attr);
+                for part in self.find_attr(attr_key) {
+                    parts.push(part);
+                }
                 part.1 = self.pos() + 1;
                 part.2 = self.pos();
 
@@ -97,19 +102,18 @@ impl<'a> Lexer<'a> {
         }
 
         parts.push(part);
-
-        Tok::Text { parts }
+        parts
     }
 
-    fn lex_val(&mut self) -> Span {
+    fn lex_val(&mut self) -> Vec<Span> {
         self.expect("\"");
-        let start = self.next_while(|s| s != "\"");
+        let val = self.lex_text("\"");
         self.expect("\"");
 
-        Span(self.sid(), start, self.pos() - 1)
+        val
     }
 
-    fn lex_attrs(&mut self) -> Vec<(Span, Span)> {
+    fn lex_attrs(&mut self) -> Vec<(Span, Vec<Span>)> {
         let mut attrs = Vec::new();
 
         while self.curr() != ">" && self.curr() != "/" {
@@ -123,7 +127,7 @@ impl<'a> Lexer<'a> {
             let val = if self.eat("=") {
                 self.lex_val()
             } else {
-                Span(self.sid(), self.pos(), self.pos())
+                Vec::new()
             };
 
             attrs.push((key, val));

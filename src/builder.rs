@@ -18,9 +18,7 @@ impl<'a> Builder<'a> {
 
     pub fn build_tok(&self, tok: &Tok) -> String {
         match tok {
-            Tok::Root { children } => {
-                self.fmt_children(children)
-            }
+            Tok::Root { children } => self.fmt_children(children),
             Tok::Doctype { cont } => {
                 format!("<!doctype {}>", self.sm.slice(&cont))
             }
@@ -51,11 +49,15 @@ impl<'a> Builder<'a> {
         children.iter().map(|c| self.build_tok(c)).collect()
     }
 
-    fn fmt_attrs(&self, attrs: &Vec<(Span, Span)>) -> String {
+    fn fmt_attrs(&self, attrs: &[(Span, Vec<Span>)]) -> String {
         attrs
             .iter()
             .map(|(key, val)| {
-                format!(" {}=\"{}\"", self.sm.slice(key), self.sm.slice(val))
+                format!(
+                    " {}=\"{}\"",
+                    self.sm.slice(key),
+                    val.iter().map(|v| self.sm.slice(v)).collect::<String>()
+                )
             })
             .collect()
     }

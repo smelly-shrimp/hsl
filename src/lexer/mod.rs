@@ -38,11 +38,7 @@ impl<'a> Lexer<'a> {
         self.curs.last_mut().expect("HANDLE ERR! no-cur")
     }
 
-    pub fn attrs(&self) -> &[(Span, Span)] {
-        self.cur().attrs()
-    }
-
-    pub fn find_attr(&self, attr: &str) -> Span {
+    pub fn find_attr(&self, attr: &str) -> Vec<Span> {
         let attr = &self
             .cur()
             .attrs()

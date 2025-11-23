@@ -3,11 +3,11 @@ use crate::tok::Span;
 pub struct Cur {
     sid: usize,
     pos: usize,
-    attrs: Vec<(Span, Span)>,
+    attrs: Vec<(Span, Vec<Span>)>,
 }
 
 impl Cur {
-    pub fn new(sid: usize, attrs: Vec<(Span, Span)>) -> Self {
+    pub fn new(sid: usize, attrs: Vec<(Span, Vec<Span>)>) -> Self {
         Self { sid, pos: 0, attrs }
     }
 
@@ -23,7 +23,7 @@ impl Cur {
         self.pos += 1;
     }
 
-    pub fn attrs(&self) -> &[(Span, Span)] {
+    pub fn attrs(&self) -> &[(Span, Vec<Span>)] {
         &self.attrs
     }
 }

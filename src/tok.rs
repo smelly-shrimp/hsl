@@ -11,12 +11,12 @@ pub enum Tok {
     },
     Tag {
         name: Span,
-        attrs: Vec<(Span, Span)>,
+        attrs: Vec<(Span, Vec<Span>)>,
         children: Vec<Tok>,
     },
     VoidTag {
         name: Span,
-        attrs: Vec<(Span, Span)>,
+        attrs: Vec<(Span, Vec<Span>)>,
     },
     Text {
         parts: Vec<Span>,
