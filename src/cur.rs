@@ -8,8 +8,17 @@ pub struct Cur {
 }
 
 impl Cur {
-    pub fn new(sid: usize, attrs: Vec<(Span, Vec<Span>)>, children: Vec<Tok>) -> Self {
-        Self { sid, pos: 0, attrs, children }
+    pub fn new(
+        sid: usize,
+        attrs: Vec<(Span, Vec<Span>)>,
+        children: Vec<Tok>,
+    ) -> Self {
+        Self {
+            sid,
+            pos: 0,
+            attrs,
+            children,
+        }
     }
 
     pub fn sid(&self) -> usize {

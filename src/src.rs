@@ -33,9 +33,8 @@ impl SrcMan {
 
 impl Src {
     fn new(path: String) -> Self {
-        let mut cont = fs::read_to_string(&path).expect("HANDLE ERR! no-file");
-        let len = cont.trim().len();
-        cont.truncate(len);
+        let cont = fs::read_to_string(&path).expect("HANDLE ERR! no-file");
+        let cont = cont.trim().into();
         Self { path: path, cont }
     }
 }
