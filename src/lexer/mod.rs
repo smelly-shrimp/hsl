@@ -15,7 +15,7 @@ impl<'a> Lexer<'a> {
     pub fn new(sm: &'a mut SrcMan, sid: usize) -> Self {
         Self {
             sm,
-            curs: vec![Cur::new(sid)],
+            curs: vec![Cur::new(sid, Vec::new())],
         }
     }
 
@@ -30,18 +30,34 @@ impl<'a> Lexer<'a> {
         Tok::Root { children: toks }
     }
 
-    pub fn cur_mut(&mut self) -> &mut Cur {
+    fn cur(&self) -> &Cur {
+        self.curs.last().expect("HANDLE ERR! no-cur")
+    }
+
+    fn cur_mut(&mut self) -> &mut Cur {
         self.curs.last_mut().expect("HANDLE ERR! no-cur")
     }
 
+    pub fn attrs(&self) -> &[(Span, Span)] {
+        self.cur().attrs()
+    }
+
+    pub fn find_attr(&self, attr: &str) -> &str {
+        let attr = &self
+            .cur()
+            .attrs()
+            .iter()
+            .find(|(key, _)| attr == self.text(&key))
+            .expect("HANDLE ERR! no-attr");
+        self.text(&attr.1)
+    }
+
     pub fn sid(&self) -> usize {
-        let cur = self.curs.last().expect("HANDLE ERR! no-cur");
-        cur.sid()
+        self.cur().sid()
     }
 
     pub fn pos(&self) -> usize {
-        let cur = self.curs.last().expect("HANDLE ERR! no-cur");
-        cur.pos()
+        self.cur().pos()
     }
 
     pub fn text(&self, span: &Span) -> &str {

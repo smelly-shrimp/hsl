@@ -53,7 +53,7 @@ impl<'a> Lexer<'a> {
             for (key, val) in &attrs {
                 if self.text(&key) == "src" {
                     let sid = self.sm.load(String::from(self.text(&val)));
-                    self.curs.push(Cur::new(sid));
+                    self.curs.push(Cur::new(sid, attrs));
                     return self.lex();
                 }
             }
