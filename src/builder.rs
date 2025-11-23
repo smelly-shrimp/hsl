@@ -23,7 +23,7 @@ impl<'a> Builder<'a> {
                 .trim()
                 .into(),
             Tok::Doctype { cont } => {
-                format!("<!doctype {}>", self.sm.slice(&cont))
+                format!("<!{}>", self.sm.slice(&cont))
             }
             Tok::Text { parts } => parts
                 .iter()
