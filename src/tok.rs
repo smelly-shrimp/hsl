@@ -116,6 +116,7 @@ impl IsVoid for str {
                 | "source"
                 | "track"
                 | "wbr"
+                | "children"
         )
     }
 }

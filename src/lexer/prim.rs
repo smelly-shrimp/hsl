@@ -26,6 +26,11 @@ impl<'a> Lexer<'a> {
 
         if self.text(&name).is_void() {
             self.expect(">");
+
+            if self.text(&name) == "children" {
+                dbg!("CHILDREN!");
+            }
+
             return Tok::VoidTag { name, attrs };
         }
 
