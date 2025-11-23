@@ -1,5 +1,6 @@
 use crate::{
     cur::Cur,
+    log,
     src::SrcMan,
     tok::{Span, Tok},
 };
@@ -33,21 +34,25 @@ impl<'a> Lexer<'a> {
     }
 
     fn cur(&self) -> &Cur {
-        self.curs.last().expect("HANDLE ERR! no-cur")
+        self.curs
+            .last()
+            .unwrap_or_else(|| log::err("no source cursor"))
     }
 
     fn cur_mut(&mut self) -> &mut Cur {
-        self.curs.last_mut().expect("HANDLE ERR! no-cur")
+        self.curs
+            .last_mut()
+            .unwrap_or_else(|| log::err("no source cursor"))
     }
 
     pub fn find_attr(&self, attr: &str) -> Vec<Span> {
-        let attr = &self
-            .cur()
+        self.cur()
             .attrs()
             .iter()
             .find(|(key, _)| attr == self.text(&key))
-            .expect("HANDLE ERR! no-attr");
-        attr.1.clone()
+            .unwrap_or_else(|| log::err(&format!("no attribute '{}'", attr)))
+            .1
+            .clone()
     }
 
     pub fn find_children(&self) -> Vec<Tok> {
@@ -100,7 +105,7 @@ impl<'a> Lexer<'a> {
     pub fn expect(&mut self, s: &str) {
         let cs = self.next();
         if cs != s {
-            panic!("expected `{}`, got `{}`", s, cs);
+            log::err(&format!("expected `{}`, got `{}`", s, cs));
         }
     }
 
@@ -117,7 +122,7 @@ impl<'a> Lexer<'a> {
     pub fn expect_space(&mut self) {
         let start = self.next_while(|s| s == " " || s == "\t" || s == "\n");
         if start == self.pos() {
-            panic!("expected <space>");
+            log::err("expected `space`");
         }
     }
 

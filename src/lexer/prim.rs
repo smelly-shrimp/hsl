@@ -1,6 +1,7 @@
 use crate::{
     cur::Cur,
     lexer::Lexer,
+    log,
     tok::{IsVoid, Span, Tok},
 };
 
@@ -55,18 +56,26 @@ impl<'a> Lexer<'a> {
             let name_close = self.lex_id();
             self.expect(">");
 
-            if self.text(&name) != self.text(&name_close) {
-                panic!("no corresponding closing tag");
+            let name = self.text(&name);
+            if name != self.text(&name_close) {
+                log::err(&format!(
+                    "no corresponding closing tag for `{}`",
+                    name
+                ))
             }
         }
 
         if self.text(&name) == "include" {
             for (key, val) in &attrs {
                 if self.text(&key) == "src" {
-                    let sid = self.sm.load(String::from(
-                        self.text(&val.get(0).expect("HANDLE ERR! no-path")),
-                    ));
+                    let mut path = String::new();
+                    for part in val {
+                        path.push_str(self.text(&part));
+                    }
+
+                    let sid = self.sm.load(path);
                     self.curs.push(Cur::new(sid, attrs, children));
+
                     return self.lex();
                 }
             }

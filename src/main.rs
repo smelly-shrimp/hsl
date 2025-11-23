@@ -1,6 +1,4 @@
-use std::{
-    env, fs::OpenOptions, io::Write,
-};
+use std::{env, fs::OpenOptions, io::Write};
 
 use crate::{builder::Builder, lexer::Lexer, src::SrcMan};
 
