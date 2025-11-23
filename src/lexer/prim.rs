@@ -30,6 +30,7 @@ impl<'a> Lexer<'a> {
         if self.eat("/") {
             is_closed = true;
         }
+        self.expect(">");
 
         if !is_closed {
             while !self.is_eof() && (self.curr() != "<" || self.peek() != "/") {
@@ -39,13 +40,12 @@ impl<'a> Lexer<'a> {
             self.expect("<");
             self.expect("/");
             let name_close = self.lex_id();
+            self.expect(">");
 
             if self.text(&name) != self.text(&name_close) {
                 panic!("no corresponding closing tag");
             }
         }
-
-        self.expect(">");
 
         if self.text(&name) == "include" {
             for (key, val) in &attrs {
@@ -81,9 +81,10 @@ impl<'a> Lexer<'a> {
             if s == "{" {
                 parts.push(part.clone());
 
-                let mut attr_id = self.lex_id();
-                attr_id.0 -= 1;
-                parts.push(attr_id);
+                let attr_key = self.lex_id();
+                let attr_key = self.sm.slice(&attr_key);
+                let attr = self.find_attr(attr_key);
+                parts.push(attr);
                 part.1 = self.pos() + 1;
                 part.2 = self.pos();
 

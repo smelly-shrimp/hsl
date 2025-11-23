@@ -42,14 +42,14 @@ impl<'a> Lexer<'a> {
         self.cur().attrs()
     }
 
-    pub fn find_attr(&self, attr: &str) -> &str {
+    pub fn find_attr(&self, attr: &str) -> Span {
         let attr = &self
             .cur()
             .attrs()
             .iter()
             .find(|(key, _)| attr == self.text(&key))
             .expect("HANDLE ERR! no-attr");
-        self.text(&attr.1)
+        attr.1.clone()
     }
 
     pub fn sid(&self) -> usize {
