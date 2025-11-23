@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Span(pub usize, pub usize, pub usize);
 
 #[derive(Debug)]
@@ -19,8 +19,11 @@ pub enum Tok {
         attrs: Vec<(Span, Span)>,
     },
     Text {
-        cont: Span,
+        parts: Vec<Span>,
     },
+    // TextConcat {
+    //     parts: Vec<Span>,
+    // }
 }
 
 // impl Display for Tok {

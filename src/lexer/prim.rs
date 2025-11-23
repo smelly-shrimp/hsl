@@ -9,9 +9,7 @@ impl<'a> Lexer<'a> {
         let mut is_closed = false;
 
         if !self.eat("<") {
-            return Tok::Text {
-                cont: self.lex_text(),
-            };
+            return self.lex_text();
         }
 
         if self.eat("!") {
@@ -72,9 +70,32 @@ impl<'a> Lexer<'a> {
         Span(self.sid(), start, self.pos())
     }
 
-    fn lex_text(&mut self) -> Span {
-        let start = self.next_while(|s| s != "<");
-        Span(self.sid(), start, self.pos())
+    fn lex_text(&mut self) -> Tok {
+        let start = self.pos();
+        let mut parts = Vec::new();
+        let mut part = Span(self.sid(), start, start);
+
+        while !self.is_eof() && self.curr() != "<" {
+            let s = self.next();
+            
+            if s == "{" {
+                parts.push(part.clone());
+
+                let mut attr_id = self.lex_id();
+                attr_id.0 -= 1;
+                parts.push(attr_id);
+                part.1 = self.pos() + 1;
+                part.2 = self.pos();
+
+                self.expect("}");
+            }
+
+            part.2 += 1;
+        }
+
+        parts.push(part);
+
+        Tok::Text { parts }
     }
 
     fn lex_val(&mut self) -> Span {
