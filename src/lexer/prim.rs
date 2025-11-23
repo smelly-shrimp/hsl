@@ -65,8 +65,10 @@ impl<'a> Lexer<'a> {
     }
 
     fn lex_id(&mut self) -> Span {
-        let start =
-            self.next_while(|s| s.as_bytes()[0].is_ascii_alphanumeric());
+        let start = self.next_while(|s| {
+            let s = s.as_bytes()[0];
+            s.is_ascii_alphanumeric() || s == 45 // 45 = '-'
+        });
         Span(self.sid(), start, self.pos())
     }
 

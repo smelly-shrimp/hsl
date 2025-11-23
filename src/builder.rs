@@ -55,7 +55,7 @@ impl<'a> Builder<'a> {
         attrs
             .iter()
             .map(|(key, val)| {
-                format!("{}=\"{}\"", self.sm.slice(key), self.sm.slice(val))
+                format!(" {}=\"{}\"", self.sm.slice(key), self.sm.slice(val))
             })
             .collect()
     }
