@@ -15,7 +15,7 @@ impl<'a> Lexer<'a> {
     pub fn new(sm: &'a mut SrcMan, sid: usize) -> Self {
         Self {
             sm,
-            curs: vec![Cur::new(sid, Vec::new())],
+            curs: vec![Cur::new(sid, Vec::new(), Vec::new())],
         }
     }
 
@@ -46,6 +46,10 @@ impl<'a> Lexer<'a> {
             .find(|(key, _)| attr == self.text(&key))
             .expect("HANDLE ERR! no-attr");
         attr.1.clone()
+    }
+
+    pub fn find_children(&self) -> Vec<Tok> {
+        self.cur().children().clone()
     }
 
     pub fn sid(&self) -> usize {

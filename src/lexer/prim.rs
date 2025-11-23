@@ -28,7 +28,9 @@ impl<'a> Lexer<'a> {
             self.expect(">");
 
             if self.text(&name) == "children" {
-                dbg!("CHILDREN!");
+                return Tok::Root {
+                    children: self.find_children(),
+                };
             }
 
             return Tok::VoidTag { name, attrs };
@@ -60,7 +62,7 @@ impl<'a> Lexer<'a> {
                     let sid = self.sm.load(String::from(
                         self.text(&val.get(0).expect("HANDLE ERR! no-path")),
                     ));
-                    self.curs.push(Cur::new(sid, attrs));
+                    self.curs.push(Cur::new(sid, attrs, children));
                     return self.lex();
                 }
             }

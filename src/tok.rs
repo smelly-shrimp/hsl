@@ -1,7 +1,7 @@
 #[derive(Clone, Debug)]
 pub struct Span(pub usize, pub usize, pub usize);
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Tok {
     Root {
         children: Vec<Tok>,
