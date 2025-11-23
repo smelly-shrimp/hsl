@@ -60,7 +60,7 @@ impl<'a> Builder<'a> {
 
         for child in children {
             let prefix = if !is_text_only {
-                &format!("\n{}", "  ".repeat(indent))
+                &format!("\n{}", "\t".repeat(indent))
             } else {
                 ""
             };
@@ -75,7 +75,7 @@ impl<'a> Builder<'a> {
         if children.len() > 0 && !is_text_only {
             fmt.push_str(&format!(
                 "\n{}",
-                "  ".repeat(indent.saturating_sub(1))
+                "\t".repeat(indent.saturating_sub(1))
             ));
         }
 
