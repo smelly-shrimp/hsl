@@ -23,6 +23,8 @@ impl<'a> Lexer<'a> {
         let mut toks = Vec::new();
 
         while !self.is_eof() {
+            self.eat_space();
+
             toks.push(self.to_tok());
         }
 
@@ -117,5 +119,9 @@ impl<'a> Lexer<'a> {
         if start == self.pos() {
             panic!("expected <space>");
         }
+    }
+
+    pub fn eat_space(&mut self) {
+        self.next_while(|s| s == " " || s == "\t" || s == "\n");
     }
 }

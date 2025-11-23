@@ -42,8 +42,12 @@ impl<'a> Lexer<'a> {
         self.expect(">");
 
         if !is_closed {
+            self.eat_space();
             while !self.is_eof() && (self.curr() != "<" || self.peek() != "/") {
-                children.push(self.to_tok());
+                let child = self.to_tok();
+                children.push(child);
+
+                self.eat_space();
             }
 
             self.expect("<");
